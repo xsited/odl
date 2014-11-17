@@ -197,24 +197,24 @@ class ODL(object):
 
 
     def topology(self):
-        ws.set_path('/controller/nb/v2/topology/default')
-	ws.set_port(8080)	
-        content = ws.get()
+        self.ws.set_path('/controller/nb/v2/topology/default')
+	self.ws.set_port(8080)	
+        content = self.ws.get()
         j=json.loads(content[2])
-        ws.show(j)
+        self.ws.show(j)
 
 
     def node_connections_get_all(self):
-        ws.set_path('/controller/nb/v2/connectionmanager/nodes')
-	ws.set_port(8080)	
-        content = ws.get()
+        self.ws.set_path('/controller/nb/v2/connectionmanager/nodes')
+	self.ws.set_port(8080)	
+        content = self.ws.get()
         j=json.loads(content[2])
-        ws.show(j)
+        self.ws.show(j)
 
     def statistics_ports(self):
-        ws.set_path('/controller/nb/v2/statistics/default/port')
-	ws.set_port(8080)	
-        content = ws.get()
+        self.ws.set_path('/controller/nb/v2/statistics/default/port')
+	self.ws.set_port(8080)	
+        content = self.ws.get()
         allPortStats = json.loads(content[2])
 	# ws.show(allPortStats)
         portStats = allPortStats['portStatistics']
@@ -241,9 +241,9 @@ class ODL(object):
 
     # adopted from fredhsu @ http://fredhsu.wordpress.com/2013/04/25/getting-started-with-opendaylight-and-python/
     def statistics_flows(self):
-        ws.set_path('/controller/nb/v2/statistics/default/flow')
-	ws.set_port(8080)	
-        content = ws.get()
+        self.ws.set_path('/controller/nb/v2/statistics/default/flow')
+	self.ws.set_port(8080)	
+        content = self.ws.get()
         allFlowStats = json.loads(content[2])
 
         flowStats = allFlowStats['flowStatistics']
@@ -273,21 +273,21 @@ class ODL(object):
 		print '{0:8} {1:8} {2:5} {3:15}'.format(count, actionType, actionPort, dst)
 
     def flowprogrammer_list(self):
-        ws.set_path('/controller/nb/v2/flowprogrammer/default')
-	ws.set_port(8080)	
+        self.ws.set_path('/controller/nb/v2/flowprogrammer/default')
+	self.ws.set_port(8080)	
         content = ws.get()
         j=json.loads(content[2])
-        ws.show(j)
+        self.ws.show(j)
         #ws.show(content[2])
 	return(j)
 
 
     def flowprogrammer_add(self, flow):
         # http://localhost:8080/controller/nb/v2/flowprogrammer/default/node/OF/00:00:00:00:00:00:00:01/staticFlow/flow1
-        ws.set_path('/controller/nb/v2/flowprogrammer/default/node/' + flow['node']['type'] + '/' + flow['node']['id'] + '/staticFlow/' + flow['name'] )
-	ws.set_port(8080)	
-        ws.show(flow)
-        content = ws.set(flow)
+        self.ws.set_path('/controller/nb/v2/flowprogrammer/default/node/' + flow['node']['type'] + '/' + flow['node']['id'] + '/staticFlow/' + flow['name'] )
+	self.ws.set_port(8080)	
+        self.ws.show(flow)
+        content = self.ws.set(flow)
         #print content
 	flowadd_response_codes = {
 	201:"Flow Config processed successfully",
@@ -303,9 +303,9 @@ class ODL(object):
 	print content[0], content[1], msg
 
     def flowprogrammer_remove(self, flow):
-        ws.set_path('/controller/nb/v2/flowprogrammer/default/node/' + flow['node']['type'] + '/' + flow['node']['id'] + '/staticFlow/' + flow['name'] )
-	ws.set_port(8080)	
-        content = ws.remove("", flow)
+        self.ws.set_path('/controller/nb/v2/flowprogrammer/default/node/' + flow['node']['type'] + '/' + flow['node']['id'] + '/staticFlow/' + flow['name'] )
+	self.ws.set_port(8080)	
+        content = self.ws.remove("", flow)
 
 	flowdelete_reponse_codes = {
 	204:"Flow Config deleted successfully",
@@ -329,17 +329,17 @@ class ODL(object):
     	    self.flowprogrammer_remove(fl)
 		
     def ovsdb_connect_get_all(self, manager):
-        ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager + '/tables/manager/rows')
-	ws.set_port(8080)	
-        content = ws.get()
+        self.ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager + '/tables/manager/rows')
+	self.ws.set_port(8080)	
+        content = self.ws.get()
         j=json.loads(content[2])
-        ws.show(j)
+        self.ws.show(j)
 
 
     def ovsdb_connect(self, manager, port):
-        ws.set_path('/controller/nb/v2/connectionmanager/node/' + manager + '/address/' + manager + '/port/' + str(port)) 
-	ws.set_port(8080)	
-	content = ws.put('')
+        self.ws.set_path('/controller/nb/v2/connectionmanager/node/' + manager + '/address/' + manager + '/port/' + str(port)) 
+	self.ws.set_port(8080)	
+	content = self.ws.put('')
 
 	reponse_codes = {
 	201:"ovsdb connection processed successfully",
@@ -352,8 +352,8 @@ class ODL(object):
 	print content[0], content[1], msg
 
     def ovsdb_bridge_detailed_create(self, manager, name, dtype='OPENFLOW'):
-	ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager +'/tables/bridge/rows')
-	ws.set_port(8080)	
+	self.ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager +'/tables/bridge/rows')
+	self.ws.set_port(8080)	
 	body = """
 	{
 	    "row": {
@@ -366,7 +366,7 @@ class ODL(object):
 	""" % (name, dtype)
 	print body
 	body = json.loads(body)
-	content = ws.post(body)
+	content = self.ws.post(body)
 
 	reponse_codes = {
 	201:"ovsdb processed successfully",
@@ -380,10 +380,10 @@ class ODL(object):
 	return content[2]
 
     def ovsdb_bridge_all(self, manager, port_uuid):
-	ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager + '/tables/bridge/rows')
-	ws.set_port(8080)	
+	self.ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager + '/tables/bridge/rows')
+	self.ws.set_port(8080)	
 
-	content = ws.get()
+	content = self.ws.get()
 
 	reponse_codes = {
 	200:"ovsdb processed successfully",
@@ -397,10 +397,10 @@ class ODL(object):
 	return content[0],content[2]
 
     def ovsdb_bridge_port_all(self, manager, port_uuid):
-	ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager + '/tables/port/rows')
-	ws.set_port(8080)	
+	self.ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager + '/tables/port/rows')
+	self.ws.set_port(8080)	
 
-	content = ws.get()
+	content = self.ws.get()
 
 	reponse_codes = {
 	200:"ovsdb processed successfully",
@@ -419,6 +419,8 @@ class ODL(object):
         allBridges = json.loads(body)
 
         theBridges = allBridges['rows']
+	if theBridges is None:
+		return False
 	# print "theBridges ", json.dumps(theBridges, indent=4, sort_keys=True)
         for br in theBridges:
 	    # print theBridges[br]['name']
@@ -439,6 +441,8 @@ class ODL(object):
         allBridges = json.loads(body)
 
         theBridges = allBridges['rows']
+	if theBridges is None:
+		return False
 	# print "theBridges ", json.dumps(theBridges, indent=4, sort_keys=True)
         for br in theBridges:
 	    # print theBridges[br]['name']
@@ -452,6 +456,8 @@ class ODL(object):
         allPorts = json.loads(body)
 
         thePorts = allPorts['rows']
+	if thePorts is None:
+		return False
         for pr in thePorts:
 	    # print thePorts[pr]['name']
 	    if  thePorts[pr]['name'] == name:
@@ -460,10 +466,10 @@ class ODL(object):
 		return l
 
     def ovsdb_bridge_port_get(self, manager, port_uuid):
-	ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager +'/tables/port/rows/' + port_uuid)
-	ws.set_port(8080)	
+	self.ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager +'/tables/port/rows/' + port_uuid)
+	self.ws.set_port(8080)	
 
-	content = ws.get()
+	content = self.ws.get()
 
 	reponse_codes = {
 	200:"ovsdb processed successfully",
@@ -493,6 +499,8 @@ class ODL(object):
 
         theBridges = allBridges['rows']
 	# print "theBridges ", json.dumps(theBridges, indent=4, sort_keys=True)
+	if theBridges is None:
+		return False
         for br in theBridges:
 	    # print theBridges[br]['name'] + ' == ' + name
 	    if  theBridges[br]['name'] == name:
@@ -502,16 +510,16 @@ class ODL(object):
         return False
 
     def ovsdb_bridge_create(self, manager, name):
-	ws.set_path('/controller/nb/v2/networkconfig/bridgedomain/bridge/OVS/' + manager +'/' + name)
-	ws.set_port(8080)	
-	content = ws.post({})
+	self.ws.set_path('/controller/nb/v2/networkconfig/bridgedomain/bridge/OVS/' + manager +'/' + name)
+	self.ws.set_port(8080)	
+	content = self.ws.post({})
     	msg = self.response_code_get(content[0])
 	print content[0], content[1], msg
 
     def ovsdb_bridge_port_add(self, manager, br_name, port_name):
-	ws.set_path('/controller/nb/v2/networkconfig/bridgedomain/port/OVS/' + manager + '/' + br_name + '/' + port_name)
-	ws.set_port(8080)	
-	content = ws.post({})
+	self.ws.set_path('/controller/nb/v2/networkconfig/bridgedomain/port/OVS/' + manager + '/' + br_name + '/' + port_name)
+	self.ws.set_port(8080)	
+	content = self.ws.post({})
     	msg = self.response_code_get(content[0])
 	print content[0], content[1], msg
 
@@ -527,9 +535,9 @@ class ODL(object):
         return False
 
     def ovsdb_bridge_delete(self, manager, bridge_uuid):
-	ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager +'/tables/bridge/rows/' + bridge_uuid)
-	ws.set_port(8080)	
-	content = ws.delete()
+	self.ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager +'/tables/bridge/rows/' + bridge_uuid)
+	self.ws.set_port(8080)	
+	content = self.ws.delete()
 
 	reponse_codes = {
 	200:"ovsdb processed successfully",
@@ -543,9 +551,9 @@ class ODL(object):
 	print content[0], content[1], msg
 
     def ovsdb_bridge_controller_delete(self, manager, controller_uuid):
-	ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager + '/tables/controller/rows/' + controller_uuid)
-	ws.set_port(8080)	
-	content = ws.delete()
+	self.ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager + '/tables/controller/rows/' + controller_uuid)
+	self.ws.set_port(8080)	
+	content = self.ws.delete()
 
 	reponse_codes = {
 	200:"ovsdb processed successfully",
@@ -560,9 +568,9 @@ class ODL(object):
 	print content[0], content[1], msg
 
     def ovsdb_bridge_port_interface_remove(self, manager, interface_uuid):
-	ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager +'/tables/interface/rows/' + interface_uuid)
-	ws.set_port(8080)	
-	content = ws.delete()
+	self.ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager +'/tables/interface/rows/' + interface_uuid)
+	self.ws.set_port(8080)	
+	content = self.ws.delete()
 
 	reponse_codes = {
 	200:"ovsdb processed successfully",
@@ -577,9 +585,9 @@ class ODL(object):
 	
 
     def ovsdb_bridge_port_remove(self, manager, port_uuid):
-	ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager +'/tables/port/rows/' + port_uuid)
-	ws.set_port(8080)	
-	content = ws.delete()
+	self.ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager +'/tables/port/rows/' + port_uuid)
+	self.ws.set_port(8080)	
+	content = self.ws.delete()
 
 	reponse_codes = {
 	201:"ovsdb processed successfully",
@@ -593,8 +601,8 @@ class ODL(object):
 	print content[0], content[1], msg
 
     def ovsdb_bridge_port_detailed_add(self, manager, bridge_uuid, port_name):
-	ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager +'/tables/port/rows')
-	ws.set_port(8080)	
+	self.ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager +'/tables/port/rows')
+	self.ws.set_port(8080)	
 	body =	"""
 	{
 	     "parent_uuid":"%s",
@@ -608,7 +616,7 @@ class ODL(object):
 
 	print body
 	body = json.loads(body)
-	content = ws.post(body)
+	content = self.ws.post(body)
 	reponse_codes = {
 	201:"ovsdb processed successfully",
 	401:"User not authorized to perform this operation",
@@ -620,9 +628,38 @@ class ODL(object):
 	print content[0], content[1], content[2], msg
 	return content[2]
 
+    def ovsdb_bridge_port_tunnel_configure_ro(self, manager, interface_uuid, remote_ip, ttype='gre'):
+	self.ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager +'/tables/interface/rows/' + interface_uuid)
+	self.ws.set_port(8080)	
+	body = """
+	{
+    	    "row": {
+        	"Interface": {
+            	"type": "%s",
+            	"options": [
+               		"map",
+               		[
+                   		[
+                        		"key", "100"
+                    		],
+                    		[
+                        		"remote_ip", "%s"
+                    		]
+                		]
+            		]
+        	}
+    	    }
+	}
+	""" % (ttype, remote_ip)
+	print body
+	body = json.loads(body)
+	content = self.ws.put(body)
+    	msg = self.response_code_get(content[0])
+	print content[0], content[1], msg
+
     def ovsdb_bridge_port_tunnel_configure(self, manager, interface_uuid, remote_ip, local_ip='127.0.0.1', ttype='gre'):
-	ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager +'/tables/interface/rows/' + interface_uuid)
-	ws.set_port(8080)	
+	self.ws.set_path('/ovsdb/nb/v2/node/OVS/' + manager +'/tables/interface/rows/' + interface_uuid)
+	self.ws.set_port(8080)	
 	body = """
 	{
     	    "row": {
@@ -648,19 +685,76 @@ class ODL(object):
 	""" % (ttype, local_ip,remote_ip)
 	print body
 	body = json.loads(body)
-	content = ws.put(body)
+	content = self.ws.put(body)
     	msg = self.response_code_get(content[0])
 	print content[0], content[1], msg
-"""
-	reponse_codes = {
-	201:"ovsdb processed successfully",
-	401:"User not authorized to perform this operation",
-	406:"Invalid operation. Failure details included in HTTP Error response",
-	500:"Failure Reason included in HTTP Error response",
-	503:"One or more of Controller service is unavailable",
-	}
-	msg=reponse_codes.get(content[0])
-"""
+
+
+    def ovsdb_build_bridge_and_tunnel_port(self, manager='10.197.1.220', bridge='superbridge0', port='gre100', remote_ip='10.197.2.222', local_ip='10.197.2.220', tunnel_type='gre'):
+	    print "Check if bridge exists ..."
+            # if the bridge exists we need to the the handles associated with the bridge
+	    if not self.ovsdb_bridge_exists(manager, bridge):
+	       print "Create bridge ..."
+	       self.ovsdb_bridge_create(manager, bridge)
+	       b_uuid =  self.ovsdb_bridge_uuid_from_name(manager, bridge)
+	    else:
+	       print "Get bridge id ..."
+	       b_uuid =  self.ovsdb_bridge_uuid_from_name(manager, bridge)
+
+            # if the port exists we need to get the handles associated with the port
+	    if not self.ovsdb_bridge_port_exists(manager, bridge, port):
+	       print "Add port to bridge ..."
+	       self.ovsdb_bridge_port_add(manager, bridge, port)
+	       p_uuid =  self.ovsdb_bridge_port_uuid_from_name(manager, port)
+	    else:
+	       print "Get bridge port id ..."
+	       p_uuid =  self.ovsdb_bridge_port_uuid_from_name(manager, port)
+
+	    print "Get bridge port interface id ..."
+            # this is a bit tricky and yet another handle for an associated object
+	    i_uuid = self.ovsdb_bridge_port_interface_get(manager, p_uuid)
+	    self.ovsdb_bridge_port_tunnel_configure(manager, i_uuid, remote_ip, local_ip, tunnel_type)
+
+	    return True
+
+    def ovsdb_bridge_name_delete(self, manager, bridge):
+	    if not self.ovsdb_bridge_exists(manager, bridge):
+		return False
+	    else:
+	       print "Get bridge id ..."
+	       b_uuid =  self.ovsdb_bridge_uuid_from_name(manager, bridge)
+    	       self.ovsdb_bridge_delete( manager, b_uuid)
+	    return True
+
+    def ovsdb_bridge_tunnel_port_remove(self, manager, bridge, port):
+            # if the port exists we need to get the handles associated with the port
+	    if not self.ovsdb_bridge_port_exists(manager, bridge, port):
+		return False
+	    else:
+	       print "Get bridge port id ..."
+	       p_uuid =  self.ovsdb_bridge_port_uuid_from_name(manager, port)
+
+    	    self.ovsdb_bridge_port_remove(manager, p_uuid)
+	    return True
+
+    def ovsdb_bridge_tunnel_port_add(self, manager, bridge, port, remote_ip, tunnel_type):
+            # if the port exists we need to get the handles associated with the port
+	    if self.ovsdb_bridge_port_exists(manager, bridge, port):
+		# maybe remove it and go on to recreate it?
+		return False
+	    else:
+	        self.ovsdb_bridge_port_add(manager, bridge, port)
+	        p_uuid = self.ovsdb_bridge_port_uuid_from_name(manager, port)
+	        i_uuid = self.ovsdb_bridge_port_interface_get(manager, p_uuid)
+	        self.ovsdb_bridge_port_tunnel_configure_ro(manager, i_uuid, remote_ip, tunnel_type)
+	    return True
+
+    def ovsdb_bridge_of_controller_delete(self, manager, bridge):
+	    print "Get bridge controller id ..."
+	    c_uuid = self.ovsdb_bridge_controller_uuid_from_name( manager, bridge)
+	    print "Delete bridge controller ...", c_uuid
+	    # currently this command results in the linux interface being destroyed
+	    self.ovsdb_bridge_controller_delete(manager, c_uuid)
 
 
 class ODLMenu(object):
@@ -701,6 +795,12 @@ class ODLMenu(object):
         print ("57. OVSDB Bridge Port Simple Add")
         print ("58. OVSDB Bridge Port Detailed Add")
         print ("59. OVSDB Bridge Port Tunnel Add Solo")
+        print ("60. OVSDB Tunnel Build")
+        print ("61. OVSDB Tunnel Port Add")
+        print ("62. OVSDB Tunnel Port Remove")
+        print ("63. OVSDB Tunnel Destroy")
+        print ("64. OVSDB Bridge Controller Disable")
+        print ("70. OVSDB Test Topology List")
         print ("q. Quit               ")
 #        print (30 * '-')
 
@@ -741,6 +841,12 @@ class ODLMenu(object):
 	"57":self.tests.ovsdb_bridge_port_add_simple,
 	"58":self.tests.ovsdb_bridge_port_add_detailed,
 	"59":self.tests.ovsdb_bridge_port_tunnel_add_solo,
+	"60":self.tests.ovsdb_tunnel_build,
+	"61":self.tests.ovsdb_tunnel_port_add,
+	"62":self.tests.ovsdb_tunnel_port_remove,
+	"63":self.tests.ovsdb_tunnel_destroy,
+	"64":self.tests.ovsdb_bridge_controller_disable,
+	"70":self.tests.ovsdb_test_topo_dump,
 	"q" :self.tests.exit_app,
         }
 
@@ -849,7 +955,7 @@ flow7={
    "installInHw": "true", 
    "name": "flow7", 
    "node": {
-         "id": "00:00:0e:21:52:b5:6b:44",
+         "id": "00:00:92:a0:15:9b:bb:4a",
          "type": "OF"
     }, 
     "nwSrc": "10.0.0.1", 
@@ -939,17 +1045,38 @@ class ODLTests(object):
             self.p_uuid = ''
             self.i_uuid = ''
             self.c_uuid = ''
-	    self.manager = '10.197.1.220'
-	    self.remote_ip = '10.197.2.222'
-	    self.local_ip = '10.197.2.220'
+	    self.manager = self.manager_a = '10.197.1.220'
+	    self.manager_b = '10.197.1.222'
+	    self.remote_ip = self.wan_ip_a = '10.197.2.222'
+	    self.local_ip = self.wan_ip_b = '10.197.2.220'
+	    self.bridge_ip_a = '192.168.222.220'
+	    self.bridge_ip_b = '192.168.222.222'
 	    self.br_name = 'superbridge0'
 	    self.port_name = 'gre1000'
 	    self.tunnel_type = 'vxlan'
 	    
-	def setup_network(self, manager='10.197.1.220', bridge='superbridge0', port='gre100', remote_ip='10.197.2.222', local_ip='10.197.2.220', tunnel_type='gre' ):
-	    self.manager = manager
-	    self.remote_ip = remote_ip
-	    self.local_ip = local_ip 
+        def ovsdb_test_topo_dump(self):
+            print "Current bridge uuid     ",self.b_uuid
+            print "Current port uuid       ",self.p_uuid
+            print "Current interface  uuid ",self.i_uuid
+            print "Current controller uuid ",self.c_uuid
+	    print "Compute endpoint   a    ",self.manager_a
+	    print "Compute endpoint   a    ",self.manager_a
+	    print "Compute manager         ",self.manager
+	    print "Current wan ip b (remote) ",self.remote_ip
+	    print "Current wan ip a (local)  ",self.local_ip
+	    print "Current bridge ip a     ",self.bridge_ip_a
+	    print "Current bridge ip b     ",self.bridge_ip_b
+	    print "Current bridge name     ",self.br_name
+	    print "Current bridge port     ",self.port_name
+	    print "Current tunnel type     ",self.tunnel_type
+
+
+	def setup_network(self, manager_a='10.197.1.220', manager_b='10.197.1.222', bridge='superbridge0', port='gre100', wan_ip_b='10.197.2.222', wan_ip_a='10.197.2.220', tunnel_type='gre', bridge_ip='192.168.222.222' ):
+	    self.manager = self.manager_a = manager_a
+	    self.manager_b = manager_b
+	    self.remote_ip = self.wan_ip_b  = wan_ip_b
+	    self.local_ip  = self.wan_ip_a  = wan_ip_a
 	    self.br_name = bridge
 	    self.port_name = port
 	    self.tunnel_type = tunnel_type
@@ -1056,6 +1183,7 @@ class ODLTests(object):
             print "Quit           "
             exit(0)
 
+	# this method seems equally valid but does not seem to create or leave a linux interface
 	def ovsdb_bridge_port_tunnel_add_1(self):
 	    self.odl.ovsdb_connect(self.manager, 6640)
 
@@ -1065,9 +1193,6 @@ class ODLTests(object):
 	       # option 1.
 	       self.b_uuid = self.odl.ovsdb_bridge_detailed_create(self.manager, self.br_name)
 
-	       # option 2.
-	       #self.odl.ovsdb_bridge_create(self.manager, self.br_name)
-	       #self.b_uuid =  self.odl.ovsdb_bridge_uuid_from_name(self.manager, self.br_name)
 	       print "b_uuid ", self.b_uuid
 	    else:
 	       print "Get bridge id ..."
@@ -1078,7 +1203,6 @@ class ODLTests(object):
 	    if not self.odl.ovsdb_bridge_port_exists(self.manager, self.br_name, self.port_name):
 	       print "Add port to bridge ..."
 	       self.p_uuid = self.odl.ovsdb_bridge_port_detailed_add(self.manager, self.b_uuid, self.port_name)
-	       # self.odl.ovsdb_bridge_port_add(self.manager, self.b_uuid, self.port_name)
 	    else:
 	       print "Get bridge port id ..."
 	       self.p_uuid =  self.odl.ovsdb_bridge_port_uuid_from_name(self.manager, self.port_name)
@@ -1092,6 +1216,7 @@ class ODLTests(object):
 	    print "Get bridge controller id ..."
 	    self.c_uuid = self.odl.ovsdb_bridge_controller_uuid_from_name( self.manager, self.br_name)
 	    print "Delete bridge controller ...", self.c_uuid
+	    # currently this command results in the linux interface being destroyed
 	    self.odl.ovsdb_bridge_controller_delete(self.manager, self.c_uuid)
 
 
@@ -1126,25 +1251,47 @@ class ODLTests(object):
 	    print "Get bridge port interface id ..."
 	    self.i_uuid = self.odl.ovsdb_bridge_port_interface_get(self.manager, self.p_uuid)
 
-	    print "Configure bridge port tunnel ... i_uuid"
+	    print "Configure bridge port tunnel ... ", self.i_uuid
 	    self.odl.ovsdb_bridge_port_tunnel_configure(self.manager, self.i_uuid, self.remote_ip, self.local_ip, self.tunnel_type)
 
 	    print "Get bridge controller id ..."
 	    self.c_uuid = self.odl.ovsdb_bridge_controller_uuid_from_name( self.manager, self.br_name)
 	    print "Delete bridge controller ...", self.c_uuid
+	    # currently this command results in the linux interface being destroyed -- bug or miss use?  unclear
 	    self.odl.ovsdb_bridge_controller_delete(self.manager, self.c_uuid)
 
+	def ovsdb_tunnel_build(self):
+	    # setup the parameters for the endpoint of both halves of the tunnel
+	    # Need to setup only once.  Repeated connections to connection manager cause all ODL file handles to be exhausted
+	     
+	    self.odl.ovsdb_connect(self.manager_a, 6640)
+            self.odl.ovsdb_build_bridge_and_tunnel_port(self.manager_a, self.br_name, self.port_name, self.wan_ip_b, self.wan_ip_a)
 
-	    #import time
-	    #time.sleep(20)
-	    #self.odl.ovsdb_bridge_port_interface_remove(self.manager, self.i_uuid)
-    	    #self.odl.ovsdb_bridge_port_interface_remove(self.manager, self.p_uuid)
-            #self.odl.ovsdb_bridge_port_remove(self.manager, self.p_uuid)
+	    self.odl.ovsdb_connect(self.manager_b, 6640)
+            self.odl.ovsdb_build_bridge_and_tunnel_port(self.manager_b, self.br_name, self.port_name, self.wan_ip_a, self.wan_ip_b)
+	    
+	    
+	def ovsdb_tunnel_destroy(self):
+            self.odl.ovsdb_bridge_name_delete(self.manager_a, self.br_name)
+            self.odl.ovsdb_bridge_name_delete(self.manager_b, self.br_name)
+
+	def ovsdb_tunnel_port_remove(self):
+            self.odl.ovsdb_bridge_tunnel_port_remove(self.manager_a, self.br_name, self.port_name)
+            self.odl.ovsdb_bridge_tunnel_port_remove(self.manager_b, self.br_name, self.port_name)
+
+	def ovsdb_tunnel_port_add(self):
+            self.odl.ovsdb_bridge_tunnel_port_add(self.manager_a, self.br_name, self.port_name, self.wan_ip_b, self.tunnel_type)
+            self.odl.ovsdb_bridge_tunnel_port_add(self.manager_b, self.br_name, self.port_name, self.wan_ip_a, self.tunnel_type)
+
+        def ovsdb_bridge_controller_disable(self):
+            self.odl.ovsdb_bridge_of_controller_delete(self.manager_a, self.br_name)
+            self.odl.ovsdb_bridge_of_controller_delete(self.manager_b, self.br_name)
+
 
 	def ovsdb_bridge_port_tunnel_remove(self):
 	    #self.odl.ovsdb_bridge_port_interface_remove(self.manager, self.i_uuid)
     	    #self.odl.ovsdb_bridge_port_interface_remove(self.manager, self.p_uuid)
-            self.odl.ovsdb_bridge_port_remove(self.manager, self.p_uuid)
+            self.odl.ovsdb_bridge_port_remove(self.manager_a, self.p_uuid)
 
 	def ovsdb_bridge_delete(self):
             self.odl.ovsdb_bridge_delete(self.manager, self.b_uuid)
@@ -1187,9 +1334,9 @@ if __name__ == "__main__":
     ws.credentials('admin', 'admin')
     odl = ODL(ws)
     tests = ODLTests(odl)
-    tests.setup_network( '10.197.1.220', 'superbridge0', 'gre100', '10.197.2.222', '10.197.2.220', 'vxlan' )
+    tests.setup_network( '10.197.1.220', '10.197.1.222', 'superbridge0', 'gre100', '10.197.2.222', '10.197.2.220', 'vxlan' )
     # LV mobile
-    # tests.setup_network( '10.0.0.135', 'superbridge0', 'gre100', '10.36.0.135', '10.36.0.136', 'gre' )
+    # tests.setup_network( '10.0.0.135', 10.0.0.136', 'superbridge0', 'gre100', '10.36.0.135', '10.36.0.136', 'gre' )
 
     menu=ODLMenu(tests)
     menu.run()
