@@ -12,7 +12,7 @@ https://docs.google.com/document/d/1YtzSL-XhmUgcrCNKDKKmkMPDlp1qEbHqYTzLWTUxNCA/
 
 Checkout and Test
 
-git clone https://github.com/cablelabs/odl.git
+git clone https://github.com/xsited/odl.git
 
 
 Usage Notes
